@@ -9,8 +9,8 @@ public class OpeniddictClientInitializer : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public OpeniddictClientInitializer(IServiceProvider serviceProvider)
-        => _serviceProvider = serviceProvider;
+    public OpeniddictClientInitializer(IServiceProvider serviceProvider) =>
+        _serviceProvider = serviceProvider;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -26,7 +26,10 @@ public class OpeniddictClientInitializer : IHostedService
 
         foreach (var client in clients)
         {
-            var openiddictClient = await manager.FindByClientIdAsync(client.ClientId, cancellationToken);
+            var openiddictClient = await manager.FindByClientIdAsync(
+                client.ClientId,
+                cancellationToken
+            );
             // await manager.DeleteAsync(openiddictClient, ct);
             // openiddictClient = null;
 

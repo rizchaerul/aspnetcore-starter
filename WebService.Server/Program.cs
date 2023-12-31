@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using NSwag;
+using NSwag.AspNetCore;
+using NSwag.Generation.Processors.Security;
 using OpenIddict.Abstractions;
 using WebService.Database.Entities;
 using WebService.Server.Contracts.Constants;
@@ -10,12 +13,48 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
+var openIdConnectOptions = configuration
+    .GetSection(OpenIdConnectOptions.OpenIdConnect)
+    .Get<OpenIdConnectOptions>();
+
 services.Configure<OpenIddictOptions>(configuration.GetSection(OpenIddictOptions.OpenIddict));
 
 // Add services to the container.
 services.AddControllers();
-services.AddOpenApiDocument();
 services.AddRazorPages();
+
+services.AddCors(options =>
+{
+    options.AddPolicy(
+        name: PolicyConstants.CorsPolicy,
+        policy =>
+        {
+            policy.AllowAnyOrigin();
+            policy.AllowAnyHeader();
+            policy.AllowAnyMethod();
+        }
+    );
+});
+
+services.AddOpenApiDocument(options =>
+{
+    options.AddSecurity(
+        "bearer",
+        new OpenApiSecurityScheme
+        {
+            AuthorizationUrl = $"{openIdConnectOptions?.Authority}/connect/authorize",
+            TokenUrl = $"{openIdConnectOptions?.Authority}/connect/token",
+            Flow = OpenApiOAuth2Flow.AccessCode,
+            Type = OpenApiSecuritySchemeType.OAuth2,
+            Scopes = new Dictionary<string, string> { { $"api", "Access APIs" }, },
+
+            // If you want to use id_token instead of access_token
+            // ExtensionData = new Dictionary<string, object?> { { "x-tokenName", "id_token" } },
+        }
+    );
+
+    options.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
+});
 
 services.AddDbContextPool<ApplicationDbContext>(options =>
 {
@@ -35,17 +74,16 @@ services
         }
     );
 
-services.AddAuthorization(options =>
-{
-    options.AddPolicy(
-        AuthConstant.ApiScopePolicy,
+services
+    .AddAuthorizationBuilder()
+    .AddPolicy(
+        PolicyConstants.ApiScopePolicy,
         policy =>
         {
             policy.RequireAuthenticatedUser();
             policy.RequireClaim(OpenIddictConstants.Claims.Private.Scope, "api");
         }
     );
-});
 
 services
     .AddOpenIddict()
@@ -81,9 +119,9 @@ services
         options.RegisterClaims(OpenIddictConstants.Scopes.Profile);
 
         // Register scopes (permissions)
+        options.RegisterScopes("api");
         options.RegisterScopes(OpenIddictConstants.Scopes.Email);
         options.RegisterScopes(OpenIddictConstants.Scopes.Profile);
-        options.RegisterScopes("api");
 
         // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
         options
@@ -113,7 +151,14 @@ if (!app.Environment.IsDevelopment())
 if (app.Environment.IsDevelopment())
 {
     app.UseOpenApi();
-    app.UseSwaggerUi();
+    app.UseSwaggerUi(options =>
+    {
+        options.OAuth2Client = new OAuth2ClientSettings
+        {
+            ClientId = openIdConnectOptions?.ClientId,
+            UsePkceWithAuthorizationCodeGrant = true,
+        };
+    });
 
     // Generate Openiddict tables
     // app.Services.CreateScope().ServiceProvider.GetService<DbContext>()?.Database.EnsureCreated();
@@ -121,6 +166,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors(PolicyConstants.CorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
