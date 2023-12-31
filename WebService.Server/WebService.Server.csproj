@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <!-- TODO: Upgrade when new version is released -->
     <PackageReference Include="NSwag.AspNetCore" Version="14.0.0-preview012" />
     <PackageReference Include="OpenIddict.AspNetCore" Version="5.0.1" />

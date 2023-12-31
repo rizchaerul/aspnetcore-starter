@@ -1,0 +1,42 @@
+@page
+@model WebService.Pages.Account.LoginModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container">
+    <div class="vh-100 d-flex align-items-center justify-content-center">
+        <div class="col col-md-8 col-lg-6">
+            <h1 class="text-center mb-5">Login</h1>
+
+            <form method="post">
+                <div class="form-floating mb-3">
+                    <input
+                        asp-for="Email"
+                        type="text"
+                        class="form-control"
+                        id="floatingInput"
+                        placeholder="coolUsername"
+                    />
+                    <label for="floatingInput">Email</label>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-5">
+                    <input
+                        asp-for="Password"
+                        type="password"
+                        class="form-control"
+                        id="floatingPassword"
+                        placeholder="Password"
+                    />
+                    <label for="floatingPassword">Password</label>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <button class="btn btn-lg btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </div>
+</div>
