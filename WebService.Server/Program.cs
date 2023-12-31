@@ -7,6 +7,7 @@ using OpenIddict.Abstractions;
 using WebService.Database.Entities;
 using WebService.Server.Contracts.Constants;
 using WebService.Server.Contracts.Options;
+using WebService.Server.Middlewares;
 using WebService.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +40,7 @@ services.AddCors(options =>
 services.AddOpenApiDocument(options =>
 {
     options.AddSecurity(
-        "bearer",
+        "Bearer",
         new OpenApiSecurityScheme
         {
             AuthorizationUrl = $"{openIdConnectOptions?.Authority}/connect/authorize",
@@ -53,7 +54,7 @@ services.AddOpenApiDocument(options =>
         }
     );
 
-    options.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
+    options.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
 
 services.AddDbContextPool<ApplicationDbContext>(options =>
@@ -95,6 +96,8 @@ services
     // Register the OpenIddict server components.
     .AddServer(options =>
     {
+        options.UseDataProtection();
+
         // Allowed flows
         // PKCE
         options.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
@@ -134,6 +137,7 @@ services
     })
     .AddValidation(options =>
     {
+        options.UseDataProtection();
         options.UseLocalServer();
         options.UseAspNetCore();
     });
@@ -169,6 +173,7 @@ app.UseRouting();
 app.UseCors(PolicyConstants.CorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseActivityMiddleware();
 app.MapControllers();
 app.MapRazorPages();
 app.Run();

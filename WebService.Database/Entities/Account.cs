@@ -27,4 +27,7 @@ public partial class Account
     [StringLength(255)]
     [Unicode(false)]
     public string Password { get; set; } = null!;
+
+    [Column(TypeName = "datetime")]
+    public DateTime? LastActivityAt { get; set; }
 }
