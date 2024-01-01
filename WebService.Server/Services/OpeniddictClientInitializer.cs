@@ -30,7 +30,7 @@ public class OpeniddictClientInitializer : IHostedService
                 client.ClientId,
                 cancellationToken
             );
-            // await manager.DeleteAsync(openiddictClient, ct);
+            // await manager.DeleteAsync(openiddictClient, cancellationToken);
             // openiddictClient = null;
 
             if (openiddictClient == null)
@@ -45,6 +45,14 @@ public class OpeniddictClientInitializer : IHostedService
                 foreach (var redirectUri in client.RedirectUris)
                 {
                     descriptor.RedirectUris.Add(new Uri(redirectUri));
+                }
+
+                if (client.PostLogoutRedirectUris != null)
+                {
+                    foreach (var postLogoutRedirectUri in client.PostLogoutRedirectUris)
+                    {
+                        descriptor.PostLogoutRedirectUris.Add(new Uri(postLogoutRedirectUri));
+                    }
                 }
 
                 foreach (var permissions in client.Permissions)

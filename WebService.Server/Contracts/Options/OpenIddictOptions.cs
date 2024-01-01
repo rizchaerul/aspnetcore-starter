@@ -12,5 +12,6 @@ public class OpenIddictClient
     public string ClientId { get; set; } = string.Empty;
     public string? ClientSecret { get; set; }
     public List<string> RedirectUris { get; set; } = new();
+    public List<string>? PostLogoutRedirectUris { get; set; }
     public List<string> Permissions { get; set; } = new();
 }

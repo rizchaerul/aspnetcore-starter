@@ -260,7 +260,7 @@ public class AuthorizationController : ControllerBase
         };
 
         // Ask the OpenIddict client middleware to redirect the user agent to the identity provider.
-        return SignOut(properties, OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+        return SignOut(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 
     private static IEnumerable<string> GetDestinations(Claim claim)
