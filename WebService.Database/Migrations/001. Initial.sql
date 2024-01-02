@@ -4,6 +4,6 @@ CREATE TABLE [Account] (
 	[FullName] [varchar](255) NOT NULL,
 	[Email] [varchar](255) NOT NULL,
 	[Password] [varchar](255) NOT NULL,
-	[Password] [datetime],
+	[LastActivityAt] [datetime],
     CONSTRAINT [PK_Account] PRIMARY KEY ([Id])
 );
